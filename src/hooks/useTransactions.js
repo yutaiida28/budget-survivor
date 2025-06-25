@@ -6,37 +6,43 @@ function useTransactions() {
   
   // TODO: Add functions here
   const addIncome = (amount, source, status = 'received') => {
-  const newIncome = {
-    id: Date.now(),           // Unique timestamp ID
-    type: 'income',
-    amount: amount,
-    source: source,
-    status: status,
-    date: new Date().toISOString().split('T')[0]  // Today's date
+    const newIncome = {
+      id: Date.now(),           // Unique timestamp ID
+      type: 'income',
+      amount: amount,
+      source: source,
+      status: status,
+      date: new Date().toISOString().split('T')[0]  // Today's date
+    };
+    
+    setTransactions([...transactions, newIncome]);  // Add to array
   };
-  
-  setTransactions([...transactions, newIncome]);  // Add to array
-};
-const addExpense = (amount, description, category = 'other') => {
-  const newExpense = {
-    id: Date.now(),
-    type: 'expense',
-    amount: amount,
-    description: description,
-    category: category,
-    paymentStatus: 'paid',  // or 'unpaid'
-    date: new Date().toISOString().split('T')[0]
+
+  const addExpense = (amount, description, category = 'other') => {
+    const newExpense = {
+      id: Date.now(),
+      type: 'expense',
+      amount: amount,
+      description: description,
+      category: category,
+      paymentStatus: 'paid',  // or 'unpaid'
+      date: new Date().toISOString().split('T')[0]
+    };
+    
+    setTransactions([...transactions, newExpense]);
   };
-  
-  setTransactions([...transactions, newExpense]);
-};
-  
+
+  const deleteTransaction = (id) =>{
+    const newArray = transactions.filter(item => item.id !== id);
+    setTransactions(newArray);
+  };
+
   // Return everything the component needs
   return {
     transactions,        // The array of all transactions
     addIncome,        // We'll build these functions
     addExpense,
-    // deleteTransaction,
+    deleteTransaction,
     // getTotalIncome
   };
 }

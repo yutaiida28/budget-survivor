@@ -1,13 +1,58 @@
 import logo from './logo.svg';
 import useTransactions from './hooks/useTransactions';
-import { useState } from 'react';
+import TransactionItem from './components/TransactionItem.js';
+import { useRef, useState, useEffect } from 'react';
 
 function App() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerRef = useRef(null);
+  const menuButtonRef = useRef(null);
   const [activeTab, setActiveTab] = useState('income');
-  const { transactions, addIncome, addExpense} = useTransactions();
+  const { transactions, addIncome, addExpense, deleteTransaction} = useTransactions();
+  useEffect(()  => {
+    if (!drawerOpen) return;
+
+    const handleClickOutside = (event) => {
+      console.log('Click outside detected!');
+      if (menuButtonRef.current && menuButtonRef.current.contains(event.target)) {
+        return; // Ignore clicks on menu button
+      }
+
+      if (drawerRef.current && !drawerRef.current.contains(event.target)){
+        console.log('Closing drawer from outside click');
+        setDrawerOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('pointerdown', handleClickOutside);
+    };
+  }, [drawerOpen]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+        <button
+          ref={menuButtonRef}
+          onClick={(e) =>{
+            console.log('Menu button clicked!');
+            e.stopPropagation();
+            setDrawerOpen(prev => !prev);
+          }} 
+        >
+          Menu
+        </button>
+        {drawerOpen && (
+          <div 
+            ref={drawerRef}
+            className="fixed top-0 right-0 h-full w-3/4 bg-white shadow-lg z-50 p-6"
+          >
+            <h2>Navigation Menu</h2>
+            {/* Your menu items will go here */}
+          </div>
+        )}
         <div className="text-center">
           <img src={logo} className="h-16 w-16 mx-auto mb-4 animate-spin" alt="logo" />
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Budget Survivor</h1>
@@ -138,31 +183,21 @@ function App() {
             {transactions.length > 0 && (
               <div className="bg-white p-3 rounded border mt-3">
                 <h3 className="font-semibold mb-2">Your Transactions</h3>
-                
-                {/* Show Income */}
-                {transactions.filter(t => t.type === 'income').map(transaction => (
-                  <div key={transaction.id} className="border-b py-2 bg-green-50">
-                    <p className="font-medium text-green-600">+${transaction.amount}</p>
-                    <p className="text-sm text-gray-600">{transaction.source}</p>
-                    <p className="text-xs text-gray-400">{transaction.date}</p>
-                  </div>
-                ))}
-                
-                {/* Show Expenses */}
-                {transactions.filter(t => t.type === 'expense').map(transaction => (
-                  <div key={transaction.id} className="border-b py-2 bg-red-50">
-                    <p className="font-medium text-red-600">-${transaction.amount}</p>
-                    <p className="text-sm text-gray-600">{transaction.description} ({transaction.category})</p>
-                    <p className="text-xs text-gray-400">{transaction.date}</p>
-                  </div>
+                {/* Show transaction */}
+                {transactions.map(transaction => (
+                  <TransactionItem 
+                    key={transaction.id}
+                    transaction={transaction} 
+                    onDelete={deleteTransaction} 
+                  />
                 ))}
               </div>
             )}
-            </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
   );
 }
 
