@@ -1,3 +1,4 @@
+import { type } from '@testing-library/user-event/dist/type';
 import useLocalStorage from './useLocalStorage';
 
 function useTransactions() {
@@ -37,13 +38,30 @@ function useTransactions() {
     setTransactions(newArray);
   };
 
+  const getTotalIncome = () => {
+    return transactions
+      .filter(transaction => transaction.type === 'income')
+      .reduce((total, transaction) => total + transaction.amount, 0);
+  };
+  const getTotalExpense = () =>{
+    return transactions
+      .filter(transaction => transaction.type === 'expense')
+      .reduce((total, transaction) => total + transaction.amount, 0);
+  };
+  
+  const getCurentBalance = () =>{
+    return getTotalIncome() - getTotalExpense();
+  }
+
   // Return everything the component needs
   return {
     transactions,        // The array of all transactions
     addIncome,        // We'll build these functions
     addExpense,
     deleteTransaction,
-    // getTotalIncome
+    getTotalIncome,
+    getTotalExpense,
+    getCurentBalance
   };
 }
 

@@ -8,7 +8,7 @@ function App() {
   const drawerRef = useRef(null);
   const menuButtonRef = useRef(null);
   const [activeTab, setActiveTab] = useState('income');
-  const { transactions, addIncome, addExpense, deleteTransaction} = useTransactions();
+  const { transactions, addIncome, addExpense, deleteTransaction, getTotalIncome, getTotalExpense, getCurentBalance} = useTransactions();
   useEffect(()  => {
     if (!drawerOpen) return;
 
@@ -33,7 +33,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+      <div className="bg-white rounded-lg shadow-xl p-8 max-w-4xl w-full mx-4">
         <button
           ref={menuButtonRef}
           onClick={(e) =>{
@@ -61,9 +61,17 @@ function App() {
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <p className="text-green-800 font-medium">Coming Soon!</p>
             <p className="text-green-600 text-sm mt-1">Your personal finance tracker is getting ready</p>
-          
+
+            <div className="mt-4 mb-4 p-3 bg-blue-50 rounded border">
+              <h3 className="font-semibold text-blue-800 mb-2">Financial Summary</h3>
+              <p className="text-gray-800">Total Income: ${getTotalIncome()}</p>
+              <p className="text-gray-800">Total Expense: ${getTotalExpense()}</p>
+              <p className="text-gray-800">Curent Balance: ${getCurentBalance()}</p>
+              <p className="text-gray-800">Transactions: {transactions.length}</p>
+            </div>
+
             {/* Replace with this input form */}
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-6">
               <p className="text-gray-800">Transactions: {transactions.length}</p>
               <div className="flex space-x-2 mb-4">
                 <button
@@ -85,6 +93,16 @@ function App() {
                   }`}
                 >
                   Add Expense
+                </button>
+                <button
+                  onClick={() => setActiveTab('getIncome')}
+                  className={`px-4 py-2 rounded ${
+                    activeTab === 'getIncome'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  Get Income
                 </button>
               </div>
               {activeTab === 'income' && (
@@ -118,67 +136,54 @@ function App() {
                   >
                     Add Income
                   </button>
-                  {/* Add this after your Add Income form
-                  {transactions.length > 0 && (
-                    <div className="bg-white p-3 rounded border mt-3">
-                      <h3 className="font-semibold mb-2">Your Income</h3>
-                      {transactions.map(transaction => (
-                        <div key={transaction.id} className="border-b py-2">
-                          <p className="font-medium">${transaction.amount}</p>
-                          <p className="text-sm text-gray-600">{transaction.source}</p>
-                          <p className="text-xs text-gray-400">{transaction.date}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )} */}
                 </div>
               )}
               {activeTab === 'expense' && (
                 <div className="bg-white p-3 rounded border">
                   <h3 className="font-semibold mb-2">Add Expense</h3>
                   <p className="text-gray-500">Expense form coming soon!</p>
-                <input 
-                  type="number" 
-                  placeholder="Amount (e.g. 25.50)" 
-                  className="w-full p-2 border rounded mb-2"
-                  id="expenseAmount"
-                />
-                <input 
-                  type="text" 
-                  placeholder="Description (e.g. Coffee, Groceries)" 
-                  className="w-full p-2 border rounded mb-2"
-                  id="expenseDescription"
-                />
-                <select 
-                  className="w-full p-2 border rounded mb-2"
-                  id="expenseCategory"
-                >
-                  <option value="food">Food</option>
-                  <option value="transport">Transport</option>
-                  <option value="housing">Housing</option>
-                  <option value="entertainment">Entertainment</option>
-                  <option value="other">Other</option>
-                </select>
-                <button 
-                  onClick={() => {
-                    const amount = document.getElementById('expenseAmount').value;
-                    const description = document.getElementById('expenseDescription').value;
-                    const category = document.getElementById('expenseCategory').value;
-                    
-                    if(amount && description && parseFloat(amount) > 0) {
-                      addExpense(parseFloat(amount), description, category);
-                      document.getElementById('expenseAmount').value = '';
-                      document.getElementById('expenseDescription').value = '';
-                    } else if (parseFloat(amount) <= 0) {
-                      alert('Expense must be a positive amount!');
-                    }
-                  }}
-                  className="bg-red-500 text-white px-4 py-2 rounded w-full"
-                >
-                  Add Expense
-                </button>
-              </div>
-            )}
+                  <input 
+                    type="number" 
+                    placeholder="Amount (e.g. 25.50)" 
+                    className="w-full p-2 border rounded mb-2"
+                    id="expenseAmount"
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Description (e.g. Coffee, Groceries)" 
+                    className="w-full p-2 border rounded mb-2"
+                    id="expenseDescription"
+                  />
+                  <select 
+                    className="w-full p-2 border rounded mb-2"
+                    id="expenseCategory"
+                  >
+                    <option value="food">Food</option>
+                    <option value="transport">Transport</option>
+                    <option value="housing">Housing</option>
+                    <option value="entertainment">Entertainment</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <button 
+                    onClick={() => {
+                      const amount = document.getElementById('expenseAmount').value;
+                      const description = document.getElementById('expenseDescription').value;
+                      const category = document.getElementById('expenseCategory').value;
+                      
+                      if(amount && description && parseFloat(amount) > 0) {
+                        addExpense(parseFloat(amount), description, category);
+                        document.getElementById('expenseAmount').value = '';
+                        document.getElementById('expenseDescription').value = '';
+                      } else if (parseFloat(amount) <= 0) {
+                        alert('Expense must be a positive amount!');
+                      }
+                    }}
+                    className="bg-red-500 text-white px-4 py-2 rounded w-full"
+                    >
+                    Add Expense
+                  </button>
+                </div>
+              )}
             {/* Replace the existing income display with this: */}
             {transactions.length > 0 && (
               <div className="bg-white p-3 rounded border mt-3">
